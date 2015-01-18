@@ -119,7 +119,6 @@ class ConnectorDatabase{
 	 */
 	private function sendQuery($q, $params){
 		$query = (is_null($params)) ? $q : $this->prepare($q, $params);
-		echo "QUERY: " . $query;
 		$result = $this->provider->query($query);
 		
 		if($this->provider->getErrorNo()){
