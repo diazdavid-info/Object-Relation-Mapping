@@ -24,7 +24,7 @@ class Api extends Rest {
 	private function getProvincia() {
 		//echo "<br />";
 		//print_r($this->_argumentos);
-		$provincias = Provincia::all();
+		$provincias = Provincia::find(1);
 		//var_dump($provincias);
 		$this->sendResponse(json_encode($provincias), 200);
 		//echo $idUsuario . "<br/>";
