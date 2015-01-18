@@ -71,12 +71,18 @@ class ConnectorDatabase{
 	 * Método que en cada llamada devuelve la posición de la array en la que esta el punto. En cada llamada mueve el puntero una posición.
 	 * @return Mixed Devuelve el valor de la posición del puntero o falso si no hay más elementos.
 	 */
-	private function renplaceParams(){
+	private function replaceParams(){
 		$b = current($this->params);
 		next($this->params);
 		return $b;
 	}
 	
+	/**
+	 * Método que prepara la query.
+	 * @param String $sql Query que se va a preparar.
+	 * @param Array $params Clasula WHERE que se quiere introducir en la query.
+	 * @return String Devuelve la query preparada para enviarla.
+	 */
 	private function prepare($sql, $params){
 		if($params){
 			foreach ($params as $key => $value){
@@ -103,33 +109,101 @@ class ConnectorDatabase{
 		
 		return $q;
 	}
+	
+	/**
+	 * Método que envía la query a la BDD.
+	 * @param String $q Query a enviar.
+	 * @param Array $params Parametros a introducir en la clausula WHERE.
+	 * @throws Exception Lanza una excepción en el caso de que la query de error.
+	 * @return mysqli_result Devuelve lo que devuelva la query.
+	 */
+	private function sendQuery($q, $params){
+		$query = (is_null($params)) ? $q : $this->prepare($q, $params);
+		echo "QUERY: " . $query;
+		$result = $this->provider->query($query);
+		
+		if($this->provider->getErrorNo()){
+			error_log($this->provider->getError());
+			throw new Exception($this->provider->getError());
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * Método que prepara el resultado de la query y devuelve solo la primera fila.
+	 * @param String $q Query a enviar.
+	 * @param Array $params Parametros a introducir en la clausula WHERE.
+	 * @return Devuelve un array en el caso de la SELECT y boolean en los otros casos.
+	 */
+	public function executeScalar($q, $params = null){
+		$result = $this->sendQuery($q, $params);
+		$response = null;
+		if(!is_null($result)){
+			if(!is_object($result)){
+				$response = $result;
+			}else{
+				$row = $this->provider->fetchArray($result);
+				//$response = $row[0]; //REVISAR
+				$response = $row;
+			}
+		}
+		return $response;
+	}
+	
+	/**
+	 * Método que prepara el resultado de la query y devuelve un array con todas las filas.
+	 * @param String $q Query a enviar.
+	 * @param String $array_index
+	 * @param Array $params Parametros a introducir en la clausula WHERE.
+	 * @return Devuelve un array en el caso de la SELECT y boolean en los otros casos.
+	 */
+	public function execute($q, $array_index = null, $params = null){
+		$result = $this->sendQuery($q, $params);
+		$response = ($this->provider->getErrorNo()) ? false : true;
+		if((is_object($result) || $this->provider->numRows($result) || $result) && ($result !== true && $result !== false)){
+			while($row = $this->provider->fetchArray($result)){
+				if($array_index){
+					$arr[$row[$array_index]] = row;
+				}else{
+					$arr[] = $row;
+				}
+			}
+			$response = $arr;
+		}
+		return $response;
+	}
+	
+	/**
+	 * Método para cambiar de BDD.
+	 * @param mysqli $database Objeto de la conexion.
+	 * @return Boolean Devuelve true o false en función si el cambio fué bien.
+	 */
+	public function changeDB($database){
+		return $this->provider->changeDB($database);
+	}
+	
+	/**
+	 * Método que devuelve el ID autogenerado de la tabla si tiene una columna autoincremental en un insert o update.
+	 * @return Integer Devuelve el ID de la fila.
+	 */
+	public function getInsertedID(){
+		return $this->provider->getInsertedID();
+	}
+	
+	/**
+	 * Método que devuelve el error del último método llamado.
+	 * @return String Devuelve un String con el error MySql.
+	 */
+	public function getError(){
+		return $this->provider->getError();
+	}
+	
+	/**
+	 * Método que destruye la conexión a la BDD.
+	 */
+	public function __destruct(){
+		$this->provider->disconnect();
+		$this->provider = null;
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

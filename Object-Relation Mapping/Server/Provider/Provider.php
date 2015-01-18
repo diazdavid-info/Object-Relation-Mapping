@@ -14,7 +14,7 @@ abstract class Provider{
 	public abstract function connect ($host, $user, $pass, $dbname);
 	
 	// Método para desconectar de la BDD
-	public abstract function diconnect ();
+	public abstract function disconnect ();
 	
 	// Método que devuelve el código de error
 	public abstract function getErrorNo ();

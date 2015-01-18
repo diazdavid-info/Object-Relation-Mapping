@@ -33,7 +33,7 @@ class MySqlProvider extends Provider{
 	 * @see Provider::diconnect()
 	 * @return Boolean Devuelve true si la conexión se ha cerrado y false en caso contrario.
 	 */
-	public function diconnect (){
+	public function disconnect (){
 		$result = $this->resource->close();
 		$this->resource = null;
 		return $result;
@@ -74,7 +74,7 @@ class MySqlProvider extends Provider{
 	 * @return Integer Devuelve un número entero con las filas de la SELECT.
 	 */
 	public function numRows ($resource){
-		return ($resource) ? $resource->num_rows : 0;
+		return ($resource && is_object($resource)) ? $resource->num_rows : 0;
 	}
 
 	/**
