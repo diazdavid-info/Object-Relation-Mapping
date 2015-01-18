@@ -1,5 +1,7 @@
 <?php
-require_once '../ORM/ORM.php';
+require_once '../Classes/Provincia.php';
 
-$orm = new ORM();
+$provincias = Provincia::all();
+echo "<br />";
+var_dump($provincias);
 echo "<br />FIN<br />";
